@@ -265,7 +265,6 @@ function updateColorPicker2() {
 }
 
 hue = 0
-
 selectedcolor = "#000000"
 
 function selectColorPicker(event) {
