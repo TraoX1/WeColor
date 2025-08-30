@@ -19,6 +19,26 @@ async function drawPixel() {
 
     canvas.strokeStyle = 'white';
 
+    const data = {
+
+    };
+    fetch('https://traoxfish.eu-4.evennode.com/getcanvas', {
+        method: 'POST',
+        credentials: "same-origin",
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    }).then(response => {
+        return response.json();
+    }).then(json => {
+        if (json.status == "success") {
+            pixelData = json.canvas
+        } else {
+
+        }
+    });
+
     for (var i = 0; i < 256; i ++) { 
         if (Math.random() < 0.05) await delay(1).then(() => {})
         for (var j = 0; j < 256; j++) {
@@ -168,29 +188,68 @@ var down = false
 function placePixel(event, down1) {
     down = down1
 
+    index = lastIndex
+
     if (down == false) {
         clearInterval(holdInterval)
         return
     } else {
-        var index1 = lastIndex
-        var canvas = document.getElementById("canvas").getContext("2d");
-        pixelData[index1] = selectedcolor
-        canvas.fillStyle = selectedcolor
-        var i1 = Math.floor(index1 / 256)
-        var j1 = index1 % 256
-        canvas.fillRect(i1 * 10, j1 * 10, 10, 10);
+        const data = {
+            "color": selectedcolor,
+            "index": index
+        };
+        fetch('https://traoxfish.eu-4.evennode.com/place', {
+            method: 'POST',
+            credentials: "same-origin",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        }).then(response => {
+            return response.json();
+        }).then(json => {
+            if (json.status == "success") {
+                var canvas = document.getElementById("canvas").getContext("2d");
+                pixelData[index] = selectedcolor
+                canvas.fillStyle = selectedcolor
+                var i1 = Math.floor(index / 256)
+                var j1 = index % 256
+                canvas.fillRect(i1 * 10, j1 * 10, 10, 10);
+            } else {
+
+            }
+        });
     }
 
     var last2 = -1
 
     holdInterval = setInterval(function() {
-        var index1 = lastIndex
-        var canvas = document.getElementById("canvas").getContext("2d");
-        pixelData[index1] = selectedcolor
-        canvas.fillStyle = selectedcolor
-        var i1 = Math.floor(index1 / 256)
-        var j1 = index1 % 256
-        canvas.fillRect(i1 * 10, j1 * 10, 10, 10);
+        index1 = lastIndex
+        const data = {
+            "color": selectedcolor,
+            "index": index1
+        };
+        fetch('https://traoxfish.eu-4.evennode.com/place', {
+            method: 'POST',
+            credentials: "same-origin",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        }).then(response => {
+            return response.json();
+        }).then(json => {
+            if (json.status == "success") {
+                var canvas = document.getElementById("canvas").getContext("2d");
+                pixelData[index1] = selectedcolor
+                canvas.fillStyle = selectedcolor
+                var i1 = Math.floor(index1 / 256)
+                var j1 = index1 % 256
+                canvas.fillRect(i1 * 10, j1 * 10, 10, 10);
+            } else {
+
+            }
+        });
     }, 5)
 }
 
@@ -293,4 +352,34 @@ updateColorPicker(0)
 
 updateColorPicker2()
 
-drawPixel()
+function keepAlive() {
+    const data = {
+
+    };
+    fetch('https://traoxfish.eu-4.evennode.com/alive', {
+        method: 'POST',
+        credentials: "same-origin",
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    }).then(response => {
+        return response.json();
+    }).then(json => {
+        if (json.status == "success") {
+            document.getElementById("tokens").innerHTML = "Tokens: " + json.tokens
+        } else {
+
+        }
+    });
+}
+
+setInterval(function() {
+    
+    keepAlive()
+}, 1000)
+
+setInterval(function() {
+    drawPixel()
+}, 200)
+
