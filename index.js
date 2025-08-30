@@ -379,6 +379,7 @@ function keepAlive() {
     }).then(json => {
         if (json.status == "success") {
             document.getElementById("tokens").innerHTML = "Tokens: " + json.tokens
+            document.getElementById("online").innerHTML = "Users Online: " + json.online
         } else {
 
         }
