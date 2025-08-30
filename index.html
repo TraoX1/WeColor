@@ -15,10 +15,12 @@
 
     <div style="width: 10vw; height: 10vw; position: absolute; display: block; margin-left: 20vw; margin-top: 12.5vh;">
       <canvas onmousedown="selectColorPicker(event)" id="colorpickercanvas" height="2560" width="2560" style="background-color: white; width: calc(100% - 2px); height: calc(100% - 2px); border-style: solid; border-width: 1px; border-color: white;"></canvas>
+      <div id="colorbox" style="margin-top: -0.4vw; margin-left: calc(100% - 0.4vw);  width: 0.25vw; height: 0.25vw; border-color: white; border-width: 1px; border-style: solid; position: absolute;"></div>
       <canvas onmousemove="getHuePickerPos(event)" onmouseover="getHuePickerPos(event)" id="colorpickercanvas2" height="2560" width="2560" style="background-color: white; width: calc(100% - 2px); height: calc(10% - 2px); margin-top: 4px; border-color: white; border-style: solid; border-width: 1px;"></canvas>
       <div id="huebar" style="margin-top: -10%;  width: 0.1vw; height: calc(10% - 2px); border-color: white; border-width: 1px; border-style: solid; position: absolute;"></div>
       <p style="color: white; font-size: 1vw; margin-top: 2px;">Selected Color:</p>
       <div id="selectedcolor" style="width: calc(3vw - 2px); height: calc(1vw - 2px); background-color: black; margin-left: calc(100% - 3vw); margin-top: -2vw; border-width: 1px; border-style: solid; border-color: white;"></div>
+      
       <p id="tokens" style="color: white; font-size: 1vw;">Tokens: Loading...</p>
     </div>
 

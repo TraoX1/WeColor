@@ -1,6 +1,7 @@
 var cursorx = -1
 var cursory = -1
 var pixelData = [] 
+var knownPixelData = []
 
 function delay(time) {
     return new Promise(resolve => setTimeout(resolve, time));
@@ -18,7 +19,6 @@ async function drawPixel() {
     var height = document.getElementById("canvas").height
 
     canvas.strokeStyle = 'white';
-
     const data = {
 
     };
@@ -34,6 +34,10 @@ async function drawPixel() {
     }).then(json => {
         if (json.status == "success") {
             pixelData = json.canvas
+            for (var i = 0; i < knownPixelData.length; i++) {
+                if (knownPixelData[i] != undefined) pixelData[i] = knownPixelData[i]
+            }
+            knownPixelData = []
         } else {
 
         }
@@ -211,6 +215,7 @@ function placePixel(event, down1) {
             if (json.status == "success") {
                 var canvas = document.getElementById("canvas").getContext("2d");
                 pixelData[index] = selectedcolor
+                knownPixelData[index] = selectedcolor
                 canvas.fillStyle = selectedcolor
                 var i1 = Math.floor(index / 256)
                 var j1 = index % 256
@@ -225,6 +230,7 @@ function placePixel(event, down1) {
 
     holdInterval = setInterval(function() {
         index1 = lastIndex
+        if (last2 == lastIndex) return
         const data = {
             "color": selectedcolor,
             "index": index1
@@ -242,6 +248,7 @@ function placePixel(event, down1) {
             if (json.status == "success") {
                 var canvas = document.getElementById("canvas").getContext("2d");
                 pixelData[index1] = selectedcolor
+                knownPixelData[index1] = selectedcolor
                 canvas.fillStyle = selectedcolor
                 var i1 = Math.floor(index1 / 256)
                 var j1 = index1 % 256
@@ -250,6 +257,7 @@ function placePixel(event, down1) {
 
             }
         });
+        last2 = lastIndex
     }, 5)
 }
 
@@ -333,6 +341,9 @@ function selectColorPicker(event) {
     selectedcolor = hsvToHex(hue, x, 256-y)
 
     document.getElementById("selectedcolor").style.backgroundColor = selectedcolor
+    document.getElementById("colorbox").style.marginLeft = "calc(" + (x / 256 * 96) + "% - 0.1vw)"
+    document.getElementById("colorbox").style.marginTop = "calc(-" + ((256-y) / 256 * 96) + "% - 0.4vw)"
+
 }
 
 async function getHuePickerPos(event) {
