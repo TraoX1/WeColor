@@ -232,18 +232,17 @@ function hsvToHex(h, s, v) {
     );
 }
 
-function updateColorPicker(hue) {
+async function updateColorPicker(hue) {
     var canvas = document.getElementById("colorpickercanvas").getContext("2d");
     var width = document.getElementById("colorpickercanvas").width
     var height = document.getElementById("colorpickercanvas").height
 
     canvas.strokeStyle = 'white';
 
-    for (var i = 0; i < 256; i ++) { 
-        for (var j = 0; j < 256; j++) {
-
-            canvas.fillStyle = hsvToHex(hue, i, 256-j)
-            canvas.fillRect(i * 10, j * 10, 10, 10);
+    for (var i = 0; i < 128; i ++) { 
+        for (var j = 0; j < 128; j++) {
+            canvas.fillStyle = hsvToHex(hue, i * 2, (128-j) * 2)
+            canvas.fillRect(i * 20, j * 20, 20, 20);
         }
     }
 }
@@ -257,7 +256,6 @@ function updateColorPicker2() {
 
     for (var i = 0; i < 360; i ++) { 
         for (var j = 0; j < 360; j++) {
-
             canvas.fillStyle = hsvToHex(i, 256, 256)
             canvas.fillRect((i / 360 * 256) * 10, (j / 360 * 256) * 10, 10, 10);
         }
@@ -278,12 +276,16 @@ function selectColorPicker(event) {
     document.getElementById("selectedcolor").style.backgroundColor = selectedcolor
 }
 
-function getHuePickerPos(event) {
+async function getHuePickerPos(event) {
     var rect = event.target.getBoundingClientRect();
 
     var x = Math.round((event.clientX - 2 - (rect.left - 4)) / document.getElementById("colorpickercanvas2").clientWidth * 254)
 
+    document.getElementById("huebar").style.marginLeft = (x/256 * 98) - 1 +  "%"
+
     hue = (x / 256 * 360) - 4
+
+    await delay(100).then(() => {})
     updateColorPicker(hue)
 }
 
