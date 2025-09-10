@@ -359,9 +359,11 @@ async function getHuePickerPos(event) {
     updateColorPicker(hue)
 }
 
-updateColorPicker(0)
+delay(10).then(() => {
+    updateColorPicker(0)
 
-updateColorPicker2()
+    updateColorPicker2()
+})
 
 function keepAlive() {
     const data = {
