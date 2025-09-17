@@ -299,7 +299,7 @@ function hsvToHex(h, s, v) {
     );
 }
 
-async function updateColorPicker(hue) {
+function updateColorPicker(hue) {
     var canvas = document.getElementById("colorpickercanvas").getContext("2d");
     var width = document.getElementById("colorpickercanvas").width
     var height = document.getElementById("colorpickercanvas").height
@@ -359,12 +359,6 @@ async function getHuePickerPos(event) {
     updateColorPicker(hue)
 }
 
-delay(10).then(() => {
-    updateColorPicker(0)
-
-    updateColorPicker2()
-})
-
 function keepAlive() {
     const data = {
 
@@ -388,8 +382,12 @@ function keepAlive() {
     });
 }
 
+updateColorPicker(hue)
+updateColorPicker2()
+
 setInterval(function() {
-    
+    updateColorPicker(hue)
+    updateColorPicker2()
     keepAlive()
 }, 1000)
 
