@@ -1,5 +1,3 @@
-// ui.js — your UI code
-
 function setColor(hex) {
   selectedcolor = hex;
   var box = document.getElementById("selectedcolor");
