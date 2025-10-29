@@ -8,6 +8,22 @@ const canvasEl = document.getElementById("canvas");
 const ctx = canvasEl.getContext("2d");
 ctx.imageSmoothingEnabled = false;
 
+const WORLD_CELLS = 256;
+const CELL = 10;
+const WORLD_W = WORLD_CELLS * CELL;
+const WORLD_H = WORLD_CELLS * CELL;
+
+function centerToFit() {
+  const w = canvasEl.width;
+  const h = canvasEl.height;
+  const s = Math.min(w / WORLD_W, h / WORLD_H);
+  scale = s;
+  offsetX = (w - WORLD_W * scale) / 2;
+  offsetY = (h - WORLD_H * scale) / 2;
+  updateZoomLabel();
+  drawPixel();
+}
+
 let scale = 1;
 let offsetX = 0;
 let offsetY = 0;
@@ -42,9 +58,9 @@ function delay(time) {
     return new Promise(resolve => setTimeout(resolve, time));
 }
 
-for (var i = 0; i < 256; i ++) { 
-    for (var j = 0; j < 256; j++) { 
-        pixelData[i * 256 + j] = "#ffffff"
+for (var i = 0; i < WORLD_CELLS; i ++) { 
+    for (var j = 0; j < WORLD_CELLS; j++) { 
+        pixelData[i * WORLD_CELLS + j] = "#ffffff"
     }
 }
 
@@ -54,79 +70,69 @@ async function drawPixel() {
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, width, height);
+
     ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
-
     ctx.strokeStyle = 'white';
-    const data = {
 
-    };
-    fetch('https://traoxfish.eu-4.evennode.com/getcanvas', {
-        method: 'POST',
-        credentials: "same-origin",
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-    }).then(response => {
-        return response.json();
-    }).then(json => {
-        if (json.status == "success") {
-            pixelData = json.canvas
-            for (var i = 0; i < knownPixelData.length; i++) {
-                if (knownPixelData[i] != undefined) pixelData[i] = knownPixelData[i]
-            }
-            knownPixelData = []
-        } else {
+    for (var i = 0; i < WORLD_CELLS; i++) {
+        for (var j = 0; j < WORLD_CELLS; j++) {
+            ctx.fillStyle = pixelData[i * WORLD_CELLS + j] || "#ffffff";
+            ctx.fillRect(i * CELL, j * CELL, CELL, CELL);
 
-        }
-    });
+            if (i * WORLD_CELLS + j == lastIndex) {
+                var x = i + 1;
+                var y = j + 1;
 
-    for (var i = 0; i < 256; i ++) { 
-        if (Math.random() < 0.05) await delay(1).then(() => {})
-        for (var j = 0; j < 256; j++) {
+            if (pixelData[i * WORLD_CELLS + j] == undefined) continue;
 
-            ctx.fillStyle = pixelData[i * 256 + j] || "#ffffff"
-            ctx.fillRect(i * 10, j * 10, 10, 10);
+            var lum = getLuminance(HEXToVBColor(pixelData[i * WORLD_CELLS + j] || "#ffffff"));
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = lum < 20 ? 'white' : 'black';
 
-            if (i * 256 + j == lastIndex) {
-                var x = i + 1
-                var y = j + 1
-        
-                if (pixelData[i * 256 + j] == undefined) return
-        
-                var rgb = hexToRgb(pixelData[i * 256 + j] || "#ffffff")
-        
-                var lum = getLuminance(HEXToVBColor(pixelData[i * 256 + j] || "#ffffff"))
-        
-                ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo((x * CELL) - 1, (y * CELL) - 1);
+            ctx.lineTo(x * CELL - 1, (y - 1) * CELL + 1);
+            ctx.stroke();
 
-                ctx.strokeStyle = lum < 20 ? 'white' : 'black';
-        
-                ctx.beginPath();
-                ctx.moveTo((x * 10) - 1, (y * 10) - 1);
-                ctx.lineTo(x * 10 - 1, (y - 1) * 10  + 1);
-                ctx.stroke();
-        
-                ctx.beginPath();
-                ctx.moveTo(x * 10 - 1, (y - 1) * 10 + 1);
-                ctx.lineTo((x - 1) * 10 + 1, (y - 1) * 10 + 1);
-                ctx.stroke();
-        
-                ctx.beginPath();
-                ctx.moveTo((x - 1) * 10 + 1, (y - 1) * 10 + 1);
-                ctx.lineTo((x - 1) * 10 + 1, y * 10 -1);
-                ctx.stroke();
-        
-                ctx.beginPath();
-                ctx.moveTo((x - 1) * 10 + 1, y * 10 - 1);
-                ctx.lineTo(x * 10 - 1, y * 10 - 1);
-                ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x * CELL - 1, (y - 1) * CELL + 1);
+            ctx.lineTo((x - 1) * CELL + 1, (y - 1) * CELL + 1);
+            ctx.stroke();
 
+            ctx.beginPath();
+            ctx.moveTo((x - 1) * CELL + 1, (y - 1) * CELL + 1);
+            ctx.lineTo((x - 1) * CELL + 1, y * CELL - 1);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo((x - 1) * CELL + 1, y * CELL - 1);
+            ctx.lineTo(x * CELL - 1, y * CELL - 1);
+            ctx.stroke();
             }
         }
     }
 }
 
+function syncCanvasFromServer() {
+  fetch('https://traoxfish.eu-4.evennode.com/getcanvas', {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  })
+  .then(r => r.json())
+  .then(json => {
+    if (json.status === 'success') {
+      pixelData = json.canvas;
+      for (let i = 0; i < knownPixelData.length; i++) {
+        if (knownPixelData[i] !== undefined) pixelData[i] = knownPixelData[i];
+      }
+      knownPixelData = [];
+      drawPixel();
+    }
+  })
+  .catch(() => { });
+}
 
 function hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -156,19 +162,14 @@ function getPixelPlacePos(event) {
     const { sx, sy } = getCanvasScreenXY(event);
     const { x: wx, y: wy } = screenToWorld(sx, sy);
 
-    // Each cell is 10×10 world units in your current drawing
-    const CELL = 10;
-
     // 2) compute grid indices (0..255)
     const gx = Math.floor(wx / CELL);
     const gy = Math.floor(wy / CELL);
 
-    // out of bounds? bail
-    if (gx < 0 || gx >= 256 || gy < 0 || gy >= 256) {
-        // restore previous hovered cell if needed
-        if (lastIndex !== -1 && pixelData[lastIndex] !== undefined) {
-            const i1 = Math.floor(lastIndex / 256);
-            const j1 = lastIndex % 256;
+        if (gx < 0 || gx >= WORLD_CELLS || gy < 0 || gy >= WORLD_CELLS) {
+            if (lastIndex !== -1 && pixelData[lastIndex] !== undefined) {
+            const i1 = Math.floor(lastIndex / WORLD_CELLS);
+            const j1 = lastIndex % WORLD_CELLS;
             ctx.fillStyle = pixelData[lastIndex];
             ctx.fillRect(i1 * CELL, j1 * CELL, CELL, CELL);
             lastIndex = -1;
@@ -180,12 +181,12 @@ function getPixelPlacePos(event) {
     cursorx = gx + 1;
     cursory = gy + 1;
 
-    const index = gx * 256 + gy;
+    const index = gx * WORLD_CELLS + gy;
 
     // 3) restore previously highlighted cell
     if (lastIndex !== index && lastIndex !== -1 && pixelData[lastIndex] !== undefined) {
-        const i1 = Math.floor(lastIndex / 256);
-        const j1 = lastIndex % 256;
+        const i1 = Math.floor(lastIndex / WORLD_CELLS);
+        const j1 = lastIndex % WORLD_CELLS;
         ctx.fillStyle = pixelData[lastIndex];
         ctx.fillRect(i1 * CELL, j1 * CELL, CELL, CELL);
     }
@@ -228,9 +229,9 @@ function getPixelPlacePos(event) {
 
 function exitPixelCanvas() {
     if (lastIndex !== -1 && pixelData[lastIndex] !== undefined) {
-        ctx.fillStyle = pixelData[lastIndex];
-        ctx.fillRect((Math.floor(lastIndex / 256)) * 10, (lastIndex % 256) * 10, 10, 10);
-    }
+    ctx.fillStyle = pixelData[lastIndex];
+    ctx.fillRect((Math.floor(lastIndex / WORLD_CELLS)) * CELL, (lastIndex % WORLD_CELLS) * CELL, CELL, CELL);
+}
     down = false;
     cursorx = -1;
     cursory = -1;
@@ -242,8 +243,8 @@ var down = false
 
 function placePixel(event, down1) {
     down = down1
-
-    index = lastIndex
+    const index = lastIndex;
+    if (index === -1) return;
 
     if (down == false) {
         clearInterval(holdInterval)
@@ -267,9 +268,9 @@ function placePixel(event, down1) {
                 pixelData[index] = selectedcolor
                 knownPixelData[index] = selectedcolor
                 ctx.fillStyle = selectedcolor
-                var i1 = Math.floor(index / 256)
-                var j1 = index % 256
-                ctx.fillRect(i1 * 10, j1 * 10, 10, 10);
+                var i1 = Math.floor(index / WORLD_CELLS)
+                var j1 = index % WORLD_CELLS
+                ctx.fillRect(i1 * CELL, j1 * CELL, CELL, CELL);
             } else {
 
             }
@@ -299,9 +300,9 @@ function placePixel(event, down1) {
                 pixelData[index1] = selectedcolor
                 knownPixelData[index1] = selectedcolor
                 ctx.fillStyle = selectedcolor
-                var i1 = Math.floor(index1 / 256)
-                var j1 = index1 % 256
-                ctx.fillRect(i1 * 10, j1 * 10, 10, 10);
+                var i1 = Math.floor(index1 / WORLD_CELLS)
+                var j1 = index1 % WORLD_CELLS
+                ctx.fillRect(i1 * CELL, j1 * CELL, CELL, CELL);
             } else {
 
             }
@@ -501,9 +502,7 @@ document.getElementById('zoomOut')?.addEventListener('click', () => {
   zoomAtScreenPoint(1/1.2, (r.width * dpr) / 2, (r.height * dpr) / 2);
 });
 document.getElementById('resetView')?.addEventListener('click', () => {
-  scale = 1; offsetX = 0; offsetY = 0;
-  updateZoomLabel();
-  drawPixel();
+  centerToFit();
 });
 
 function resizeCanvasToDisplaySize() {
@@ -512,20 +511,25 @@ function resizeCanvasToDisplaySize() {
   const cssH = canvasEl.clientHeight;
   const needResize = canvasEl.width !== Math.floor(cssW * dpr) || canvasEl.height !== Math.floor(cssH * dpr);
   if (needResize) {
-    canvasEl.width = Math.floor(cssW * dpr);
-    canvasEl.height = Math.floor(cssH * dpr);
-  }
+  canvasEl.width = Math.floor(cssW * dpr);
+  canvasEl.height = Math.floor(cssH * dpr);
+  ctx.imageSmoothingEnabled = false;
 }
-window.addEventListener('resize', () => { resizeCanvasToDisplaySize(); drawPixel(); });
+}
+window.addEventListener('resize', () => {
+  resizeCanvasToDisplaySize();
+  centerToFit();
+});
 resizeCanvasToDisplaySize();
+centerToFit();
+
 
 setInterval(function() {
-    updateColorPicker(hue)
-    updateColorPicker2()
-    keepAlive()
+  updateColorPicker(hue)
+  updateColorPicker2()
+  keepAlive()
 }, 1000)
 
-setInterval(function() {
-    drawPixel()
-}, 200)
+setInterval(syncCanvasFromServer, 1000);
 
+syncCanvasFromServer();
