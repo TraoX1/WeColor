@@ -50,7 +50,13 @@
  </div>
 </div>
 
-
+<!-- Zoom feature -->
+<div id="zoomToolbar" style="position:absolute; left:calc(50vw - 37.5vh - 12vw); top:calc(12.5vh + 12.5vw + 12px); background:#111; border:1px solid #333; border-radius:10px; padding:10px; color:#fff; display:flex; align-items:center; gap:8px; font-size:0.9vw;">
+  <button id="zoomOut" style="padding:4px 8px; background:#222; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer;">−</button>
+  <span id="zoomLabel">100%</span>
+  <button id="zoomIn" style="padding:4px 8px; background:#222; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer;">+</button>
+  <button id="resetView" style="margin-left:6px; padding:4px 8px; background:#222; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer;">Reset</button>
+</div>
 
 <script src="index.js"></script>
 <script src="ui.js"></script>
