@@ -3,6 +3,41 @@ var cursory = -1
 var pixelData = [] 
 var knownPixelData = []
 
+// ===== CAMERA / ZOOM STATE =====
+const canvasEl = document.getElementById("canvas");
+const ctx = canvasEl.getContext("2d");
+ctx.imageSmoothingEnabled = false;
+
+let scale = 1;
+let offsetX = 0;
+let offsetY = 0;
+const MIN_SCALE = 0.25;
+const MAX_SCALE = 8;
+
+let isPanning = false;
+let panStartX = 0, panStartY = 0;
+let viewStartX = 0, viewStartY = 0;
+
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function updateZoomLabel() {
+  const label = document.getElementById('zoomLabel');
+  if (label) label.textContent = Math.round(scale * 100) + '%';
+}
+function getCanvasScreenXY(e) {
+  const rect = canvasEl.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  return {
+    sx: (e.clientX - rect.left) * dpr,
+    sy: (e.clientY - rect.top) * dpr
+  };
+}
+function screenToWorld(sx, sy) {
+  return { x: (sx - offsetX) / scale, y: (sy - offsetY) / scale };
+}
+function worldToScreen(wx, wy) {
+  return { x: wx * scale + offsetX, y: wy * scale + offsetY };
+}
+
 function delay(time) {
     return new Promise(resolve => setTimeout(resolve, time));
 }
@@ -14,11 +49,14 @@ for (var i = 0; i < 256; i ++) {
 }
 
 async function drawPixel() {
-    var canvas = document.getElementById("canvas").getContext("2d");
-    var width = document.getElementById("canvas").width
-    var height = document.getElementById("canvas").height
+    const width = canvasEl.width;
+    const height = canvasEl.height;
 
-    canvas.strokeStyle = 'white';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+    ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
+
+    ctx.strokeStyle = 'white';
     const data = {
 
     };
@@ -47,8 +85,8 @@ async function drawPixel() {
         if (Math.random() < 0.05) await delay(1).then(() => {})
         for (var j = 0; j < 256; j++) {
 
-            canvas.fillStyle = pixelData[i * 256 + j] || "#ffffff"
-            canvas.fillRect(i * 10, j * 10, 10, 10);
+            ctx.fillStyle = pixelData[i * 256 + j] || "#ffffff"
+            ctx.fillRect(i * 10, j * 10, 10, 10);
 
             if (i * 256 + j == lastIndex) {
                 var x = i + 1
@@ -60,29 +98,29 @@ async function drawPixel() {
         
                 var lum = getLuminance(HEXToVBColor(pixelData[i * 256 + j] || "#ffffff"))
         
-                canvas.lineWidth = 2;
+                ctx.lineWidth = 2;
 
-                canvas.strokeStyle = lum < 20 ? 'white' : 'black';
+                ctx.strokeStyle = lum < 20 ? 'white' : 'black';
         
-                canvas.beginPath();
-                canvas.moveTo((x * 10) - 1, (y * 10) - 1);
-                canvas.lineTo(x * 10 - 1, (y - 1) * 10  + 1);
-                canvas.stroke();
+                ctx.beginPath();
+                ctx.moveTo((x * 10) - 1, (y * 10) - 1);
+                ctx.lineTo(x * 10 - 1, (y - 1) * 10  + 1);
+                ctx.stroke();
         
-                canvas.beginPath();
-                canvas.moveTo(x * 10 - 1, (y - 1) * 10 + 1);
-                canvas.lineTo((x - 1) * 10 + 1, (y - 1) * 10 + 1);
-                canvas.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x * 10 - 1, (y - 1) * 10 + 1);
+                ctx.lineTo((x - 1) * 10 + 1, (y - 1) * 10 + 1);
+                ctx.stroke();
         
-                canvas.beginPath();
-                canvas.moveTo((x - 1) * 10 + 1, (y - 1) * 10 + 1);
-                canvas.lineTo((x - 1) * 10 + 1, y * 10 -1);
-                canvas.stroke();
+                ctx.beginPath();
+                ctx.moveTo((x - 1) * 10 + 1, (y - 1) * 10 + 1);
+                ctx.lineTo((x - 1) * 10 + 1, y * 10 -1);
+                ctx.stroke();
         
-                canvas.beginPath();
-                canvas.moveTo((x - 1) * 10 + 1, y * 10 - 1);
-                canvas.lineTo(x * 10 - 1, y * 10 - 1);
-                canvas.stroke();
+                ctx.beginPath();
+                ctx.moveTo((x - 1) * 10 + 1, y * 10 - 1);
+                ctx.lineTo(x * 10 - 1, y * 10 - 1);
+                ctx.stroke();
 
             }
         }
@@ -114,76 +152,89 @@ function getLuminance(argb) {
 var lastIndex = -1
 
 function getPixelPlacePos(event) {
-    var rect = event.target.getBoundingClientRect();
+    // 1) convert mouse → screen → world
+    const { sx, sy } = getCanvasScreenXY(event);
+    const { x: wx, y: wy } = screenToWorld(sx, sy);
 
-    var lastx = event.clientX
-    var lasty = event.clientY
+    // Each cell is 10×10 world units in your current drawing
+    const CELL = 10;
 
-    var x = Math.round((event.clientX - 2 - (rect.left - 4)) / document.getElementById("canvas").clientWidth * 256)
-    var y = Math.round((event.clientY - 2 - (rect.bottom - 4)) / document.getElementById("canvas").clientHeight * 256) + 256
+    // 2) compute grid indices (0..255)
+    const gx = Math.floor(wx / CELL);
+    const gy = Math.floor(wy / CELL);
 
-    cursorx = x
-    cursory = y
-
-    var canvas = document.getElementById("canvas").getContext("2d");
-
-    var index = ((cursorx - 1) * 256) + cursory - 1
-
-    if (lastIndex != index || (cursorx == -1 || cursory == -1)) {
-        canvas.fillStyle = pixelData[lastIndex]
-        var i1 = Math.floor(lastIndex / 256)
-        var j1 = lastIndex % 256
-        canvas.fillRect(i1 * 10, j1 * 10, 10, 10);
+    // out of bounds? bail
+    if (gx < 0 || gx >= 256 || gy < 0 || gy >= 256) {
+        // restore previous hovered cell if needed
+        if (lastIndex !== -1 && pixelData[lastIndex] !== undefined) {
+            const i1 = Math.floor(lastIndex / 256);
+            const j1 = lastIndex % 256;
+            ctx.fillStyle = pixelData[lastIndex];
+            ctx.fillRect(i1 * CELL, j1 * CELL, CELL, CELL);
+            lastIndex = -1;
+        }
+        cursorx = -1; cursory = -1;
+        return;
     }
 
-    if (cursorx != -1 && cursory != -1) {
+    cursorx = gx + 1;
+    cursory = gy + 1;
 
-        var x = cursorx
-        var y = cursory
+    const index = gx * 256 + gy;
 
-        if (pixelData[index] == undefined) return
-
-        var rgb = hexToRgb(pixelData[index])
-
-        var lum = getLuminance(HEXToVBColor(pixelData[index]))
-
-        canvas.lineWidth = 2;
-
-        canvas.strokeStyle = lum < 20 ? 'white' : 'black';
-
-        canvas.beginPath();
-        canvas.moveTo((x * 10) - 1, (y * 10) - 1);
-        canvas.lineTo(x * 10 - 1, (y - 1) * 10  + 1);
-        canvas.stroke();
-
-        canvas.beginPath();
-        canvas.moveTo(x * 10 - 1, (y - 1) * 10 + 1);
-        canvas.lineTo((x - 1) * 10 + 1, (y - 1) * 10 + 1);
-        canvas.stroke();
-
-        canvas.beginPath();
-        canvas.moveTo((x - 1) * 10 + 1, (y - 1) * 10 + 1);
-        canvas.lineTo((x - 1) * 10 + 1, y * 10 -1);
-        canvas.stroke();
-
-        canvas.beginPath();
-        canvas.moveTo((x - 1) * 10 + 1, y * 10 - 1);
-        canvas.lineTo(x * 10 - 1, y * 10 - 1);
-        canvas.stroke();
-
+    // 3) restore previously highlighted cell
+    if (lastIndex !== index && lastIndex !== -1 && pixelData[lastIndex] !== undefined) {
+        const i1 = Math.floor(lastIndex / 256);
+        const j1 = lastIndex % 256;
+        ctx.fillStyle = pixelData[lastIndex];
+        ctx.fillRect(i1 * CELL, j1 * CELL, CELL, CELL);
     }
 
-    lastIndex = index
+    // 4) draw hover outline on the new cell
+    if (pixelData[index] === undefined) {
+        lastIndex = index;
+        return;
+    }
+
+    const x = cursorx;
+    const y = cursory;
+
+    const lum = getLuminance(HEXToVBColor(pixelData[index]));
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = lum < 20 ? 'white' : 'black';
+
+    ctx.beginPath();
+    ctx.moveTo((x * CELL) - 1, (y * CELL) - 1);
+    ctx.lineTo(x * CELL - 1, (y - 1) * CELL  + 1);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x * CELL - 1, (y - 1) * CELL + 1);
+    ctx.lineTo((x - 1) * CELL + 1, (y - 1) * CELL + 1);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo((x - 1) * CELL + 1, (y - 1) * CELL + 1);
+    ctx.lineTo((x - 1) * CELL + 1, y * CELL - 1);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo((x - 1) * CELL + 1, y * CELL - 1);
+    ctx.lineTo(x * CELL - 1, y * CELL - 1);
+    ctx.stroke();
+
+    lastIndex = index;
 }
 
 function exitPixelCanvas() {
-    var canvas = document.getElementById("canvas").getContext("2d");
-    canvas.fillStyle = pixelData[lastIndex]
-    canvas.fillRect((Math.floor(lastIndex / 256)) * 10, (lastIndex % 256) * 10, 10, 10);
-    down = false
-    cursorx = -1
-    cursory = -1
-    clearInterval(holdInterval)
+    if (lastIndex !== -1 && pixelData[lastIndex] !== undefined) {
+        ctx.fillStyle = pixelData[lastIndex];
+        ctx.fillRect((Math.floor(lastIndex / 256)) * 10, (lastIndex % 256) * 10, 10, 10);
+    }
+    down = false;
+    cursorx = -1;
+    cursory = -1;
+    clearInterval(holdInterval);
 }
 
 var holdInterval
@@ -213,13 +264,12 @@ function placePixel(event, down1) {
             return response.json();
         }).then(json => {
             if (json.status == "success") {
-                var canvas = document.getElementById("canvas").getContext("2d");
                 pixelData[index] = selectedcolor
                 knownPixelData[index] = selectedcolor
-                canvas.fillStyle = selectedcolor
+                ctx.fillStyle = selectedcolor
                 var i1 = Math.floor(index / 256)
                 var j1 = index % 256
-                canvas.fillRect(i1 * 10, j1 * 10, 10, 10);
+                ctx.fillRect(i1 * 10, j1 * 10, 10, 10);
             } else {
 
             }
@@ -246,13 +296,12 @@ function placePixel(event, down1) {
             return response.json();
         }).then(json => {
             if (json.status == "success") {
-                var canvas = document.getElementById("canvas").getContext("2d");
                 pixelData[index1] = selectedcolor
                 knownPixelData[index1] = selectedcolor
-                canvas.fillStyle = selectedcolor
+                ctx.fillStyle = selectedcolor
                 var i1 = Math.floor(index1 / 256)
                 var j1 = index1 % 256
-                canvas.fillRect(i1 * 10, j1 * 10, 10, 10);
+                ctx.fillRect(i1 * 10, j1 * 10, 10, 10);
             } else {
 
             }
@@ -384,6 +433,91 @@ function keepAlive() {
 
 updateColorPicker(hue)
 updateColorPicker2()
+
+// ===== ZOOM: wheel (cursor-centric) =====
+canvasEl.addEventListener('wheel', (e) => {
+  e.preventDefault();
+
+  const zoomIntensity = 1.1;
+  const { sx, sy } = getCanvasScreenXY(e);
+  const pre = screenToWorld(sx, sy);
+
+  const direction = e.deltaY > 0 ? -1 : 1;
+  const factor = direction > 0 ? zoomIntensity : 1 / zoomIntensity;
+
+  const newScale = clamp(scale * factor, MIN_SCALE, MAX_SCALE);
+  if (newScale === scale) return;
+  scale = newScale;
+
+  const post = worldToScreen(pre.x, pre.y);
+  offsetX += sx - post.x;
+  offsetY += sy - post.y;
+
+  updateZoomLabel();
+  drawPixel();
+}, { passive: false });
+
+// ===== PAN: right-drag or modifier+left-drag =====
+canvasEl.addEventListener('mousedown', (e) => {
+  const isRight = e.button === 2;
+  const isModLeft = e.button === 0 && (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey);
+  if (isRight || isModLeft) {
+    isPanning = true;
+    panStartX = e.clientX;
+    panStartY = e.clientY;
+    viewStartX = offsetX;
+    viewStartY = offsetY;
+  }
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (!isPanning) return;
+  offsetX = viewStartX + (e.clientX - panStartX);
+  offsetY = viewStartY + (e.clientY - panStartY);
+  drawPixel();
+});
+
+window.addEventListener('mouseup', () => { isPanning = false; });
+
+canvasEl.addEventListener('contextmenu', (e) => e.preventDefault());
+
+function zoomAtScreenPoint(factor, sx, sy) {
+  const pre = screenToWorld(sx, sy);
+  scale = clamp(scale * factor, MIN_SCALE, MAX_SCALE);
+  const post = worldToScreen(pre.x, pre.y);
+  offsetX += sx - post.x;
+  offsetY += sy - post.y;
+  updateZoomLabel();
+  drawPixel();
+}
+document.getElementById('zoomIn')?.addEventListener('click', () => {
+  const r = canvasEl.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  zoomAtScreenPoint(1.2, (r.width * dpr) / 2, (r.height * dpr) / 2);
+});
+document.getElementById('zoomOut')?.addEventListener('click', () => {
+  const r = canvasEl.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  zoomAtScreenPoint(1/1.2, (r.width * dpr) / 2, (r.height * dpr) / 2);
+});
+document.getElementById('resetView')?.addEventListener('click', () => {
+  scale = 1; offsetX = 0; offsetY = 0;
+  updateZoomLabel();
+  drawPixel();
+});
+
+function resizeCanvasToDisplaySize() {
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = canvasEl.clientWidth;
+  const cssH = canvasEl.clientHeight;
+  const needResize = canvasEl.width !== Math.floor(cssW * dpr) || canvasEl.height !== Math.floor(cssH * dpr);
+  if (needResize) {
+    canvasEl.width = Math.floor(cssW * dpr);
+    canvasEl.height = Math.floor(cssH * dpr);
+  }
+}
+window.addEventListener('resize', () => { resizeCanvasToDisplaySize(); drawPixel(); });
+resizeCanvasToDisplaySize();
 
 setInterval(function() {
     updateColorPicker(hue)
