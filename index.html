@@ -3,23 +3,44 @@
   
   </head>
   <body style="background-color: black;">
-    
-
-    </canvas>
 
     <img src="images/WeColor.png" style="position: absolute; display: block; margin-top: 4vh; margin-left: calc(50% - 16vh); width: 32vh;">
 
-    <div id="canvasdiv" onmouseup="placePixel(event, false)" onmousedown="placePixel(event, true)" onmouseover="getPixelPlacePos(event)" style="border-width: 1px; border-style: solid; border-color: red; width: 75vh; height: 75vh; margin-left: calc(50vw - 37.5vh); margin-top: 12.5vh; position: absolute;">
-        <canvas id="canvas" onmouseleave="exitPixelCanvas()" onmouseover="placePixel(event, false)" onmouseleave="exitPixelCanvas()" onmousemove="getPixelPlacePos(event)"id="canvas" height="2560" width="2560" style="background-color: black; width: 100%; height: 100%;"></canvas>
+    <div id="canvasdiv"
+         onmouseup="placePixel(event, false)"
+         onmousedown="placePixel(event, true)"
+         onmouseover="getPixelPlacePos(event)"
+         style="border-width: 1px; border-style: solid; border-color: red; width: 75vh; height: 75vh; margin-left: calc(50vw - 37.5vh); margin-top: 12.5vh; position: absolute;">
+        <canvas
+          id="canvas"
+          onmouseleave="exitPixelCanvas()"
+          onmouseover="placePixel(event, false)"
+          onmousemove="getPixelPlacePos(event)"
+          height="2560" width="2560"
+          style="background-color: black; width: 100%; height: 100%;"></canvas>
     </div>
 
-<div style="position: absolute; display: block; width: 10vw; height: 10vw; left: calc(50vw - 37.5vh - 12vw); top: 10vh;">
-      <canvas onmousedown="selectColorPicker(event)" id="colorpickercanvas" height="2560" width="2560" style="background-color: white; width: calc(100% - 2px); height: calc(100% - 2px); border-style: solid; border-width: 1px; border-color: white;"></canvas>
-      <div id="colorbox" style="margin-top: -0.4vw; margin-left: calc(100% - 0.4vw);  width: 0.25vw; height: 0.25vw; border-color: white; border-width: 1px; border-style: solid; position: absolute;"></div>
-      <canvas onmousemove="getHuePickerPos(event)" onmouseover="getHuePickerPos(event)" id="colorpickercanvas2" height="2560" width="2560" style="background-color: white; width: calc(100% - 2px); height: calc(10% - 2px); margin-top: 4px; border-color: white; border-style: solid; border-width: 1px;"></canvas>
-      <div id="huebar" style="margin-top: -10%;  width: 0.1vw; height: calc(10% - 2px); border-color: white; border-width: 1px; border-style: solid; position: absolute;"></div>
-      <p style="color: white; font-size: 1vw; margin-top: 2px;">Selected Color:</p>
-      <div id="selectedcolor" style="width: calc(3vw - 2px); height: calc(1vw - 2px); background-color: black; margin-left: calc(100% - 3vw); margin-top: -2vw; border-width: 1px; border-style: solid; border-color: white;"></div>
+<div style="position: absolute; display: block; width: 10vw; height: auto; left: calc(50vw - 37.5vh - 12vw); top: 12.5vh;">
+      <canvas onmousedown="selectColorPicker(event)"
+              id="colorpickercanvas"
+              height="2560" width="2560"
+              style="background-color: white; width: calc(100% - 2px); height: calc(100% - 2px); border-style: solid; border-width: 1px; border-color: white;"></canvas>
+      <div id="colorbox"
+           style="margin-top: -0.4vw; margin-left: calc(100% - 0.4vw);  width: 0.25vw; height: 0.25vw; border-color: white; border-width: 1px; border-style: solid; position: absolute;"></div>
+<canvas
+  id="colorpickercanvas2"
+  onmousedown="getHuePickerPos(event)"
+  onmousemove="getHuePickerPos(event)"
+  onmouseover="getHuePickerPos(event)"
+  height="2560" width="2560"
+  style="background-color: white; width: calc(100% - 2px); height: 1.6vw; margin-top: 4px;
+         border-color: white; border-style: solid; border-width: 1px; cursor: ew-resize;"></canvas>      
+        <div id="huebar"
+             style="margin-top: -1.6vw; width: 0.1vw; height: 1.6vw; border-color: white; border-width: 1px; border-style: solid;
+                    position: absolute; pointer-events: none;"></div>      <p style="color: white; font-size: 1vw; margin-top: 2px;">Selected Color:</p>
+      
+      <div id="selectedcolor"
+           style="width: calc(3vw - 2px); height: calc(1vw - 2px); background-color: black; margin-left: calc(100% - 3vw); margin-top: -2vw; border-width: 1px; border-style: solid; border-color: white;"></div>
       
       <p id="tokens" style="color: white; font-size: 1vw;">Tokens: Loading...</p>
       <p id="online" style="color: white; font-size: 1vw;">Users Online: Loading...</p>
@@ -47,16 +68,19 @@
   </div>
   <div id="savedColors" style="display:grid; grid-template-columns: repeat(8, 1fr); gap:6px;"></div>
   <p style="margin:6px 0; font-size:0.8vw; color:#bbb;">Tip: right-click a swatch to delete</p>
- </div>
 </div>
 
 <!-- Zoom feature -->
-<div id="zoomToolbar" style="background:#111; border:1px solid #333; border-radius:10px; padding:10px; color:#fff; display:flex; align-items:center; gap:8px; font-size:0.9vw; margin-top:10px;">
-  <button id="zoomOut" style="padding:4px 8px; background:#222; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer;">−</button>
-  <span id="zoomLabel">100%</span>
-  <button id="zoomIn" style="padding:4px 8px; background:#222; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer;">+</button>
-  <button id="resetView" style="margin-left:6px; padding:4px 8px; background:#222; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer;">Reset</button>
-</div>
+ <div id="zoomToolbar"
+           style="color:#fff; display:flex; align-items:center; gap:8px; font-size:0.9vw; margin-top:10px;
+                  background:transparent; border:0; padding:0; white-space:nowrap;">
+        <button id="zoomOut" style="padding:4px 8px; background:#222; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer;">−</button>
+        <span id="zoomLabel">100%</span>
+        <button id="zoomIn"  style="padding:4px 8px; background:#222; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer;">+</button>
+        <button id="resetView" style="padding:4px 8px; background:#222; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer;">Reset</button>
+      </div>
+
+    </div>
 
 <script src="index.js"></script>
 <script src="ui.js"></script>
