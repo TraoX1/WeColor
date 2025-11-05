@@ -1,83 +1,67 @@
-<body style="background-color: black;">
+<html>
+  <head>
+  
+  </head>
+  <body style="background-color: black;">
+    
 
-  <img src="images/WeColor.png"
-       style="position:absolute; display:block; margin-top:4vh; margin-left:calc(50% - 16vh);
-              width:32vh; pointer-events:none; z-index:2;">
+    </canvas>
 
-  <!-- === Toolbar === -->
-  <div id="toolbar" 
-       style="position:fixed; top:0; left:0; right:0;
-              display:flex; gap:.5rem; align-items:center;
-              padding:8px 12px; color:white; font-family:sans-serif;
-              background:rgba(0,0,0,.4); backdrop-filter:saturate(120%) blur(4px);
-              z-index:10;">
-    <button id="zoomIn">+</button>
-    <button id="zoomOut">−</button>
-    <button id="resetView">Reset</button>
+    <img src="images/WeColor.png" style="position: absolute; display: block; margin-top: 4vh; margin-left: calc(50% - 16vh); width: 32vh;">
 
-    <label style="margin-left:8px;">Zoom: <span id="zoomLabel">100%</span></label>
-
-    <label style="margin-left:16px; display:flex; align-items:center; gap:.25rem;">
-      <input type="checkbox" id="toggleGrid"> Show grid
-    </label>
-
-    <button id="undoBtn" style="margin-left:16px;">Undo ⤺</button>
-    <button id="redoBtn">Redo ⤻</button>
-
-    <button id="exportPngBtn" style="margin-left:16px;">Export PNG</button>
-    <button id="exportJsonBtn">Export JSON</button>
-    <input type="file" id="importJsonInput" accept=".json" style="display:none;">
-    <button id="importJsonBtn">Import JSON</button>
-
-    <button id="playTlBtn" style="margin-left:16px;">▶ Timelapse</button>
-    <button id="pauseTlBtn">⏸ Timelapse</button>
-
-    <span id="userBadge" style="margin-left:auto; opacity:.8;"></span>
-  </div>
-
-  <div id="canvasdiv"
-       onmouseup="placePixel(event, false)"
-       onmousedown="placePixel(event, true)"
-       onmouseover="getPixelPlacePos(event)"
-       style="border:1px solid red; width:75vh; height:75vh;
-              margin-left:calc(50vw - 37.5vh); margin-top:12.5vh;
-              position:absolute; z-index:1;">
-    <canvas id="canvas"
-            onmouseleave="exitPixelCanvas()"
-            onmouseover="placePixel(event, false)"
-            onmousemove="getPixelPlacePos(event)"
-            height="2560" width="2560"
-            style="background-color:black; width:100%; height:100%;"></canvas>
-  </div>
-
-  <!-- Quick Colors block -->
-  <div style="background:#111; border:1px solid #333; border-radius:10px; padding:10px; margin-top:10px; color:#fff;">
-    <div style="font-weight:700; margin-bottom:8px; font-size:0.9vw;">Quick Colors</div>
-    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:6px;">
-      <div title="#000000" style="width:22px;height:22px;border:1px solid #ffffff66;border-radius:4px;background:#000" onclick="WeColorUI.setColor('#000000')"></div>
-      <div title="#FFFFFF" style="width:22px;height:22px;border:1px solid #ffffff66;border-radius:4px;background:#fff" onclick="WeColorUI.setColor('#FFFFFF')"></div>
-      <div title="#FF0000" style="width:22px;height:22px;border:1px solid #ffffff66;border-radius:4px;background:#f00" onclick="WeColorUI.setColor('#FF0000')"></div>
-      <div title="#00FF00" style="width:22px;height:22px;border:1px solid #ffffff66;border-radius:4px;background:#0f0" onclick="WeColorUI.setColor('#00FF00')"></div>
-      <div title="#0000FF" style="width:22px;height:22px;border:1px solid #ffffff66;border-radius:4px;background:#00f" onclick="WeColorUI.setColor('#0000FF')"></div>
-      <div title="#FFFF00" style="width:22px;height:22px;border:1px solid #ffffff66;border-radius:4px;background:#ff0" onclick="WeColorUI.setColor('#FFFF00')"></div>
-      <div title="#FF00FF" style="width:22px;height:22px;border:1px solid #ffffff66;border-radius:4px;background:#f0f" onclick="WeColorUI.setColor('#FF00FF')"></div>
-      <div title="#00FFFF" style="width:22px;height:22px;border:1px solid #ffffff66;border-radius:4px;background:#0ff" onclick="WeColorUI.setColor('#00FFFF')"></div>
+    <div id="canvasdiv" onmouseup="placePixel(event, false)" onmousedown="placePixel(event, true)" onmouseover="getPixelPlacePos(event)" style="border-width: 1px; border-style: solid; border-color: red; width: 75vh; height: 75vh; margin-left: calc(50vw - 37.5vh); margin-top: 12.5vh; position: absolute;">
+        <canvas id="canvas" onmouseleave="exitPixelCanvas()" onmouseover="placePixel(event, false)" onmouseleave="exitPixelCanvas()" onmousemove="getPixelPlacePos(event)"id="canvas" height="2560" width="2560" style="background-color: black; width: 100%; height: 100%;"></canvas>
     </div>
-  </div>
 
-  <!-- Saved Colors block -->
-  <div style="background:#111; border:1px solid #333; border-radius:10px; padding:10px; margin-top:10px; color:#fff;">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-      <div style="font-weight:700; font-size:0.9vw;">Saved Colors</div>
-      <button onclick="WeColorUI.saveCurrentColor()" style="font-size:0.8vw; padding:4px 8px; background:#222; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer;">Save current</button>
-    </div>
-    <div id="savedColors" style="display:grid; grid-template-columns: repeat(8, 1fr); gap:6px;"></div>
-    <p style="margin:6px 0; font-size:0.8vw; color:#bbb;">Tip: right-click a swatch to delete</p>
-  </div>
+<div style="position: absolute; display: block; width: 10vw; height: 10vw; left: calc(50vw - 37.5vh - 12vw); top: 12.5vh;">
+      <canvas onmousedown="selectColorPicker(event)" id="colorpickercanvas" height="2560" width="2560" style="background-color: white; width: calc(100% - 2px); height: calc(100% - 2px); border-style: solid; border-width: 1px; border-color: white;"></canvas>
+      <div id="colorbox" style="margin-top: -0.4vw; margin-left: calc(100% - 0.4vw);  width: 0.25vw; height: 0.25vw; border-color: white; border-width: 1px; border-style: solid; position: absolute;"></div>
+      <canvas onmousemove="getHuePickerPos(event)" onmouseover="getHuePickerPos(event)" id="colorpickercanvas2" height="2560" width="2560" style="background-color: white; width: calc(100% - 2px); height: calc(10% - 2px); margin-top: 4px; border-color: white; border-style: solid; border-width: 1px;"></canvas>
+      <div id="huebar" style="margin-top: -10%;  width: 0.1vw; height: calc(10% - 2px); border-color: white; border-width: 1px; border-style: solid; position: absolute;"></div>
+      <p style="color: white; font-size: 1vw; margin-top: 2px;">Selected Color:</p>
+      <div id="selectedcolor" style="width: calc(3vw - 2px); height: calc(1vw - 2px); background-color: black; margin-left: calc(100% - 3vw); margin-top: -2vw; border-width: 1px; border-style: solid; border-color: white;"></div>
+      
+      <p id="tokens" style="color: white; font-size: 1vw;">Tokens: Loading...</p>
+      <p id="online" style="color: white; font-size: 1vw;">Users Online: Loading...</p>
 
-  <script src="index.js"></script>
-  <script src="ui.js"></script>
-  <script>
-    if (window.WeColorUI) { WeColorUI.initUI(); }
-  </script>
+      <!-- Quick Colors block -->
+<div style="background:#111; border:1px solid #333; border-radius:10px; padding:10px; margin-top:10px; color:#fff;">
+  <div style="font-weight:700; margin-bottom:8px; font-size:0.9vw;">Quick Colors</div>
+<div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:6px;">
+    <div title="#000000" style="width:22px;height:22px;border:1px solid #ffffff66;border-radius:4px;background:#000" onclick="WeColorUI.setColor('#000000')"></div>
+    <div title="#FFFFFF" style="width:22px;height:22px;border:1px solid #ffffff66;border-radius:4px;background:#fff" onclick="WeColorUI.setColor('#FFFFFF')"></div>
+    <div title="#FF0000" style="width:22px;height:22px;border:1px solid #ffffff66;border-radius:4px;background:#f00" onclick="WeColorUI.setColor('#FF0000')"></div>
+    <div title="#00FF00" style="width:22px;height:22px;border:1px solid #ffffff66;border-radius:4px;background:#0f0" onclick="WeColorUI.setColor('#00FF00')"></div>
+    <div title="#0000FF" style="width:22px;height:22px;border:1px solid #ffffff66;border-radius:4px;background:#00f" onclick="WeColorUI.setColor('#0000FF')"></div>
+    <div title="#FFFF00" style="width:22px;height:22px;border:1px solid #ffffff66;border-radius:4px;background:#ff0" onclick="WeColorUI.setColor('#FFFF00')"></div>
+    <div title="#FF00FF" style="width:22px;height:22px;border:1px solid #ffffff66;border-radius:4px;background:#f0f" onclick="WeColorUI.setColor('#FF00FF')"></div>
+    <div title="#00FFFF" style="width:22px;height:22px;border:1px solid #ffffff66;border-radius:4px;background:#0ff" onclick="WeColorUI.setColor('#00FFFF')"></div>
+  </div>
+</div>
+
+<!-- Saved Colors block -->
+<div style="background:#111; border:1px solid #333; border-radius:10px; padding:10px; margin-top:10px; color:#fff;">
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+    <div style="font-weight:700; font-size:0.9vw;">Saved Colors</div>
+    <button onclick="WeColorUI.saveCurrentColor()" style="font-size:0.8vw; padding:4px 8px; background:#222; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer;">Save current</button>
+  </div>
+  <div id="savedColors" style="display:grid; grid-template-columns: repeat(8, 1fr); gap:6px;"></div>
+  <p style="margin:6px 0; font-size:0.8vw; color:#bbb;">Tip: right-click a swatch to delete</p>
+ </div>
+</div>
+
+<!-- Zoom feature -->
+<div id="zoomToolbar" style="position:absolute; left:calc(50vw - 37.5vh - 12vw); top:calc(12.5vh + 12.5vw + 12px); background:#111; border:1px solid #333; border-radius:10px; padding:10px; color:#fff; display:flex; align-items:center; gap:8px; font-size:0.9vw;">
+  <button id="zoomOut" style="padding:4px 8px; background:#222; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer;">−</button>
+  <span id="zoomLabel">100%</span>
+  <button id="zoomIn" style="padding:4px 8px; background:#222; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer;">+</button>
+  <button id="resetView" style="margin-left:6px; padding:4px 8px; background:#222; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer;">Reset</button>
+</div>
+
+<script src="index.js"></script>
+<script src="ui.js"></script>
+<script>
+  if (window.WeColorUI) { WeColorUI.initUI(); }
+</script>
 </body>
+</html>
