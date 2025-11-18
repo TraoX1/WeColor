@@ -3,6 +3,8 @@ var cursory = -1
 var pixelData = [] 
 var knownPixelData = []
 
+const API_BASE = 'http://localhost:3000';
+
 // ===== CAMERA / ZOOM STATE =====
 const canvasEl = document.getElementById("canvas");
 const ctx = canvasEl.getContext("2d");
@@ -114,7 +116,7 @@ async function drawPixel() {
 }
 
 function syncCanvasFromServer() {
-  fetch('https://traoxfish.eu-4.evennode.com/getcanvas', {
+  fetch(`${API_BASE}/getcanvas`, {
     method: 'POST',
     credentials: 'same-origin',
     headers: { 'Content-Type': 'application/json' },
@@ -254,7 +256,8 @@ function placePixel(event, down1) {
             "color": selectedcolor,
             "index": index
         };
-        fetch('https://traoxfish.eu-4.evennode.com/place', {
+        fetch(`${API_BASE}/place`, {
+
             method: 'POST',
             credentials: "same-origin",
             headers: {
@@ -286,7 +289,8 @@ function placePixel(event, down1) {
             "color": selectedcolor,
             "index": index1
         };
-        fetch('https://traoxfish.eu-4.evennode.com/place', {
+        fetch(`${API_BASE}/place`, {
+
             method: 'POST',
             credentials: "same-origin",
             headers: {
@@ -413,7 +417,7 @@ function keepAlive() {
     const data = {
 
     };
-    fetch('https://traoxfish.eu-4.evennode.com/alive', {
+    fetch(`${API_BASE}/alive`, {
         method: 'POST',
         credentials: "same-origin",
         headers: {
