@@ -257,16 +257,16 @@ function placePixel(event, down1) {
             "index": index
         };
         fetch(`${API_BASE}/place`, {
-
             method: 'POST',
-            credentials: "same-origin",
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(data),
-        }).then(response => {
+        })
+        .then(response => {
             return response.json();
-        }).then(json => {
+        })
+        .then(json => {
             if (json.status == "success") {
                 pixelData[index] = selectedcolor
                 knownPixelData[index] = selectedcolor
@@ -290,16 +290,16 @@ function placePixel(event, down1) {
             "index": index1
         };
         fetch(`${API_BASE}/place`, {
-
             method: 'POST',
-            credentials: "same-origin",
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(data),
-        }).then(response => {
+        })
+        .then(response => {
             return response.json();
-        }).then(json => {
+        })
+        .then(json => {
             if (json.status == "success") {
                 pixelData[index1] = selectedcolor
                 knownPixelData[index1] = selectedcolor
@@ -419,14 +419,15 @@ function keepAlive() {
     };
     fetch(`${API_BASE}/alive`, {
         method: 'POST',
-        credentials: "same-origin",
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
-    }).then(response => {
+    })
+    .then(response => {
         return response.json();
-    }).then(json => {
+    })
+    .then(json => {
         if (json.status == "success") {
             document.getElementById("tokens").innerHTML = "Tokens: " + json.tokens
             document.getElementById("online").innerHTML = "Users Online: " + json.online
