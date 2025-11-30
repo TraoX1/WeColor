@@ -2,18 +2,23 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middlewares
+app.use(cors({
+  origin: '*',
+  methods: ['GET','POST'],
+}));
 app.use(express.json());
 app.use(cookieParser());
 
 // Canvas size (must match frontend)
 const WORLD_CELLS = 256;
 
-// ===== USER STORAGE (for login, admin, contributors) =====
+//USER STORAGE (for login, admin, contributors)
 const usersPath = path.join(__dirname, 'data', 'users.json');
 
 function ensureUsersFile() {
@@ -56,7 +61,7 @@ function generateUserId() {
   return Date.now().toString() + Math.floor(Math.random() * 1000);
 }
 
-// ===== MOVE STORAGE (for timelapse) =====
+// MOVE STORAGE (for timelapse)
 const movesPath = path.join(__dirname, 'data', 'moves.json');
 
 function ensureMovesFile() {
@@ -92,7 +97,7 @@ function resetAllPixelCounts() {
   saveUsers(users);
 }
 
-// ===== CANVAS STORAGE =====
+//CANVAS STORAGE
 const canvasPath = path.join(__dirname, 'data', 'canvas.json');
 
 function ensureCanvasFile() {
@@ -132,7 +137,7 @@ function authMiddleware(req, res, next) {
 
 app.use(authMiddleware);
 
-// ===== AUTH ROUTES =====
+//AUTH ROUTES
 
 // Register a new user
 app.post('/api/register', (req, res) => {
@@ -205,7 +210,7 @@ app.post('/api/logout', (req, res) => {
   return res.json({ success: true });
 });
 
-// ===== CANVAS + GAME ROUTES =====
+//CANVAS + GAME ROUTES
 
 app.post('/getcanvas', (req, res) => {
   try {
@@ -220,17 +225,11 @@ app.post('/getcanvas', (req, res) => {
   }
 });
 
-// Place a pixel
+// Place a pixel (temporarily allow without login)
 app.post('/place', (req, res) => {
-  if (!req.user) {
-    return res.status(401).json({
-      status: 'error',
-      error: 'Not logged in'
-    });
-  }
-
   const { color, index } = req.body;
 
+  // Basic validation
   if (typeof color !== 'string' || typeof index !== 'number') {
     return res.status(400).json({
       status: 'error',
@@ -246,27 +245,30 @@ app.post('/place', (req, res) => {
   }
 
   try {
-    // Update canvas
+    // 1) Update canvas
     const canvas = loadCanvas();
     canvas[index] = color;
     saveCanvas(canvas);
 
-    // Increment user pixel count
-    const users = loadUsers();
-    const idx = users.findIndex(u => u.id === req.user.id);
-    if (idx !== -1) {
-      if (typeof users[idx].pixelsPlaced !== 'number') {
-        users[idx].pixelsPlaced = 0;
+    // 2) If logged in, increment user pixel count
+    const user = req.user;
+    if (user) {
+      const users = loadUsers();
+      const idx = users.findIndex(u => u.id === user.id);
+      if (idx !== -1) {
+        if (typeof users[idx].pixelsPlaced !== 'number') {
+          users[idx].pixelsPlaced = 0;
+        }
+        users[idx].pixelsPlaced += 1;
+        saveUsers(users);
       }
-      users[idx].pixelsPlaced += 1;
-      saveUsers(users);
     }
 
-    // Log move for timelapse
+    // 3) Log move for timelapse (userId can be null)
     logMove({
       index,
       color,
-      userId: req.user.id,
+      userId: user ? user.id : null,
       timestamp: Date.now()
     });
 
@@ -287,7 +289,7 @@ app.post('/alive', (req, res) => {
   });
 });
 
-// ===== STATS: TOP CONTRIBUTORS =====
+//STATS: TOP CONTRIBUTORS
 app.get('/api/top-contributors', (req, res) => {
   try {
     const users = loadUsers();
@@ -309,7 +311,7 @@ app.get('/api/top-contributors', (req, res) => {
   }
 });
 
-// ===== ADMIN: CLEAR CANVAS =====
+//ADMIN: CLEAR CANVAS
 app.post('/api/admin/clear-canvas', (req, res) => {
   if (!req.user || !req.user.isAdmin) {
     return res.status(403).json({ error: 'Not allowed' });
@@ -327,7 +329,7 @@ app.post('/api/admin/clear-canvas', (req, res) => {
   }
 });
 
-// ===== TIMELAPSE: RETURN MOVE HISTORY =====
+// TIMELAPSE: RETURN MOVE HISTORY
 app.get('/api/timelapse', (req, res) => {
   try {
     let moves = loadMoves();
