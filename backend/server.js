@@ -295,14 +295,15 @@ app.get('/api/top-contributors', (req, res) => {
     const users = loadUsers();
     const meId = req.user ? req.user.id : null;
 
-    const contributors = users
+     const contributors = users
       .map(u => ({
         username: u.username,
         pixelsPlaced: typeof u.pixelsPlaced === 'number' ? u.pixelsPlaced : 0,
         isMe: meId && u.id === meId
       }))
+      .filter(c => c.pixelsPlaced > 0)
       .sort((a, b) => b.pixelsPlaced - a.pixelsPlaced)
-      .slice(0, 20);
+      .slice(0, 15);
 
     return res.json({ contributors });
   } catch (e) {
