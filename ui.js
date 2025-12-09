@@ -1,3 +1,5 @@
+//const API_BASE = '';
+
 // Color selection + Saved colors
 
 function setColor(hex) {

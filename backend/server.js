@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 80;
 
 // Middlewares
 app.use(cors({
@@ -14,6 +14,11 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+
+app.use(express.static(path.join(__dirname, '..')));
+
+const publicPath = path.join(__dirname, '..');
+app.use(express.static(publicPath));
 
 // Canvas size (must match frontend)
 const WORLD_CELLS = 256;
@@ -314,7 +319,10 @@ app.get('/api/top-contributors', (req, res) => {
 
 //ADMIN: CLEAR CANVAS
 app.post('/api/admin/clear-canvas', (req, res) => {
+  console.log('clear-canvas hit. req.user =', req.user);
+
   if (!req.user || !req.user.isAdmin) {
+    console.log('clear-canvas rejected: not admin');
     return res.status(403).json({ error: 'Not allowed' });
   }
 
@@ -323,6 +331,7 @@ app.post('/api/admin/clear-canvas', (req, res) => {
     clearMoveHistory();
     resetAllPixelCounts();
 
+    console.log('clear-canvas success');
     return res.json({ success: true });
   } catch (e) {
     console.error('Error in /api/admin/clear-canvas', e);
