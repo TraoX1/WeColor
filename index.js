@@ -3,7 +3,7 @@ var cursory = -1
 var pixelData = [] 
 var knownPixelData = []
 
-const API_BASE = 'http://localhost:3000';
+const API_BASE = '';
 
 // ===== CAMERA / ZOOM STATE =====
 const canvasEl = document.getElementById("canvas");
@@ -414,27 +414,17 @@ async function getHuePickerPos(event) {
 }
 
 function keepAlive() {
-    const data = {
-
-    };
     fetch(`${API_BASE}/alive`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({}),
     })
-    .then(response => {
-        return response.json();
-    })
+    .then(response => response.json())
     .then(json => {
-        if (json.status == "success") {
-            document.getElementById("tokens").innerHTML = "Tokens: " + json.tokens
-            document.getElementById("online").innerHTML = "Users Online: " + json.online
-        } else {
-
-        }
-    });
+    })
+    .catch(() => {});
 }
 
 updateColorPicker(hue)

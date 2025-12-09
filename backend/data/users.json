@@ -4,6 +4,13 @@
     "username": "admin",
     "password": "admin123",
     "isAdmin": true,
+    "pixelsPlaced": 411
+  },
+  {
+    "id": "1764577172827459",
+    "username": "kayla",
+    "password": "password123",
+    "isAdmin": false,
     "pixelsPlaced": 0
   }
 ]

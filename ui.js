@@ -1,9 +1,9 @@
-const API_BASE = 'http://localhost:3000';
+//const API_BASE = '';
 
 // Color selection + Saved colors
 
 function setColor(hex) {
-  selectedcolor = hex;
+  window.selectedcolor = hex;
   var box = document.getElementById("selectedcolor");
   if (box) box.style.backgroundColor = hex;
 }
@@ -84,7 +84,7 @@ function setCurrentUser(user) {
 
 async function fetchCurrentUser() {
   try {
-    const res = await fetch(`${API_BASE}/api/me`, { credentials: 'same-origin' });
+    const res = await fetch(`${API_BASE}/api/me`);
     if (!res.ok) {
       setCurrentUser(null);
       return;
@@ -146,32 +146,37 @@ function setupAuthForms() {
   }
 
   loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (loginError) loginError.textContent = '';
+  e.preventDefault();
+  if (loginError) loginError.textContent = '';
 
-    const username = document.getElementById('loginUsername').value.trim();
-    const password = document.getElementById('loginPassword').value.trim();
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
 
-    try {
-      const res = await fetch(`${API_BASE}/api/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
-        body: JSON.stringify({ username, password })
-      });
+  try {
+    const res = await fetch(`${API_BASE}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ username, password })
+    });
 
-      const data = await res.json();
-      if (!res.ok) {
-        if (loginError) loginError.textContent = data.error || 'Login failed';
-        return;
-      }
-
-      await fetchCurrentUser();
-      loadTopContributors();
-    } catch (err) {
-      if (loginError) loginError.textContent = 'Login failed';
+    const data = await res.json();
+    if (!res.ok) {
+      if (loginError) loginError.textContent = data.error || 'Login failed';
+      return;
     }
-  });
+
+    setCurrentUser({
+      username: data.username,
+      isAdmin: data.isAdmin,
+      pixelsPlaced: data.pixelsPlaced || 0
+    });
+
+    loadTopContributors();
+  } catch (err) {
+    if (loginError) loginError.textContent = 'Login failed';
+  }
+});
 
   registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
