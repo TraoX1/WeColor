@@ -3,15 +3,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet">
     <style>
       /* Page background*/
-      body { background-color: #f5f3f0 !important; }
-
-      /* Small decorative pixel squares */
-      .bg-pixel {
-        position: absolute;
-        width: 14px; height: 14px;
-        border-radius: 2px;
-        opacity: 0.45;
-        pointer-events: none;
+      body {
+        margin: 0;
+        background: radial-gradient(circle at top, #fdf7f2 0%, #f5f3f0 40%, #eee9e3 100%);
       }
 
       .sidebar-card {
@@ -40,15 +34,14 @@
     </style>
   </head>
 
-  <body>
-    <div class="bg-pixel" style="top: 12vh; left: 12vw; background:#F25F5C;"></div>
-    <div class="bg-pixel" style="top: 22vh; left: 78vw; background:#247BA0;"></div>
-    <div class="bg-pixel" style="top: 70vh; left: 65vw; background:#FFE066;"></div>
-    <div class="bg-pixel" style="top: 58vh; left: 20vw; background:#70C1B3;"></div>
-    <div class="bg-pixel" style="top: 35vh; left: 86vw; background:#50514F;"></div>
-
-    <div style="position: absolute; top: 4vh; left: 50%; transform: translateX(-50%);
-            font-family: 'Poppins', sans-serif; font-size: 4.4vh; font-weight: 700; letter-spacing: 0.05vh;">
+<div style="position: absolute;
+            top: 3vh;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Poppins', sans-serif;
+            font-size: 6vh;        /* Bigger title */
+            font-weight: 700;
+            letter-spacing: 0.15vh;">
       <span style="color:#E76F51;">W</span>
       <span style="color:#457B9D;">e</span>
       <span style="color:#A89BD8;">C</span>
@@ -56,12 +49,12 @@
       <span style="color:#84C69B;">l</span>
       <span style="color:#F2E9B3;">o</span>
       <span style="color:#E0E1DD;">r</span>
-  </div>
+</div>
 
 <!-- User status bar (login info + admin button) -->
 <div id="userBar"
      style="position: absolute;
-            top: 9vh;
+            top: calc(12.5vh + 75vh + 2vh);
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -108,7 +101,15 @@
           style="background-color: black; width: 100%; height: 100%;"></canvas>
     </div>
 
-<div class="sidebar-card" style="position: absolute; display: block; width: 12vw; height: auto; left: calc(50vw - 37.5vh - 14vw); top: 10vh;">      <canvas onmousedown="selectColorPicker(event)"
+<div class="sidebar-card"
+     style="position: absolute;
+            display: block;
+            width: 12vw;
+            height: auto;
+            left: calc(50vw - 37.5vh - 15vw);
+            top: 50vh;
+            transform: translateY(-55%);">
+  <canvas onmousedown="selectColorPicker(event)"
               id="colorpickercanvas"
               height="2560" width="2560"
               style="background-color: white; width: calc(100% - 2px); height: calc(100% - 2px); border-style: solid; border-width: 1px; border-color: white;"></canvas>
@@ -172,9 +173,9 @@
             display: block;
             width: 14vw;
             height: auto;
-            left: calc(50vw + 37.5vh + 2vw);
-            top: 14vh;">
-
+            left: calc(50vw + 37.5vh + 3vw);
+            top: 50%;
+            transform: translateY(-50%);">
   <div style="font-weight:700; font-size:1vw; margin-bottom:6px;">
     Top Contributors
   </div>
@@ -197,9 +198,8 @@
      style="position: fixed;
             inset: 0;
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             justify-content: center;
-            padding-top: 12vh;
             background: rgba(0,0,0,0.15);
             z-index: 1000;">
 

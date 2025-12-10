@@ -19,7 +19,9 @@ function centerToFit() {
   const w = canvasEl.width;
   const h = canvasEl.height;
   const s = Math.min(w / WORLD_W, h / WORLD_H);
+
   scale = s;
+  MIN_SCALE = s;
   offsetX = (w - WORLD_W * scale) / 2;
   offsetY = (h - WORLD_H * scale) / 2;
   updateZoomLabel();
@@ -29,7 +31,7 @@ function centerToFit() {
 let scale = 1;
 let offsetX = 0;
 let offsetY = 0;
-const MIN_SCALE = 0.25;
+let MIN_SCALE = 1;
 const MAX_SCALE = 8;
 
 let isPanning = false;
@@ -115,25 +117,22 @@ async function drawPixel() {
     }
 }
 
-function syncCanvasFromServer() {
-  fetch(`${API_BASE}/getcanvas`, {
-    method: 'POST',
-    credentials: 'same-origin',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({}),
-  })
-  .then(r => r.json())
-  .then(json => {
-    if (json.status === 'success') {
-      pixelData = json.canvas;
-      for (let i = 0; i < knownPixelData.length; i++) {
-        if (knownPixelData[i] !== undefined) pixelData[i] = knownPixelData[i];
-      }
-      knownPixelData = [];
-      drawPixel();
-    }
-  })
-  .catch(() => { });
+function keepAlive() {
+    fetch(`${API_BASE}/alive`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+    })
+    .then(response => response.json())
+    .then(json => {
+        if (json.status === "success") {
+            const onlineEl = document.getElementById("online");
+            if (onlineEl) {
+                onlineEl.innerHTML = "Users Online: " + json.online;
+            }
+        }
+    })
+    .catch(() => {});
 }
 
 function hexToRgb(hex) {
@@ -411,20 +410,6 @@ async function getHuePickerPos(event) {
 
     await delay(100).then(() => {})
     updateColorPicker(hue)
-}
-
-function keepAlive() {
-    fetch(`${API_BASE}/alive`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({}),
-    })
-    .then(response => response.json())
-    .then(json => {
-    })
-    .catch(() => {});
 }
 
 updateColorPicker(hue)

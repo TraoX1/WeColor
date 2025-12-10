@@ -4,7 +4,7 @@
     "username": "admin",
     "password": "admin123",
     "isAdmin": true,
-    "pixelsPlaced": 411
+    "pixelsPlaced": 106
   },
   {
     "id": "1764577172827459",
@@ -12,5 +12,12 @@
     "password": "password123",
     "isAdmin": false,
     "pixelsPlaced": 0
+  },
+  {
+    "id": "1765352102715391",
+    "username": "test_user1",
+    "password": "testingpw1",
+    "isAdmin": false,
+    "pixelsPlaced": 24
   }
 ]
